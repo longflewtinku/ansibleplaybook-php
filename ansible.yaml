@@ -1,0 +1,49 @@
+---
+-  name : php installion over ubuntu
+   hosts: all
+   become: yes
+   tasks:
+    - name: install apache
+      ansible.builtin.apt:
+        name: apache2 
+        update_cache: yes
+        state: present
+      when:
+      - ansible_facts["distribution"] == "Ubuntu"
+    - name: install apache
+      ansible.builtin.yum:
+        name: apache2 
+        update_cache: yes
+        state: present
+      when:
+      - ansible_facts["distribution"] == "CentOS"       
+    - name: php
+      ansible.builtin.apt:
+        name:
+          - php
+          - libapache2-mod-php
+          - php-mysql
+        state: present
+      when:
+      - ansible_facts["distribution"] == "Ubuntu"
+    - name: php
+      ansible.builtin.yum:
+        name:
+          - php
+          - libapache2-mod-php
+          - php-mysql
+        state: present
+      when:
+      - ansible_facts["distribution"] == "CentOS"         
+    - name: copy the file
+      ansible.builtin.copy:
+        content:
+           '<?php
+             phphinfo();
+           ?>'
+        dest: /var/www/html/info.php
+    - name: apache server start
+      ansible.builtin.systemd:
+        name: apache2
+        enabled: yes
+        state: started        
